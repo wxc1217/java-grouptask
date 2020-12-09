@@ -19,7 +19,7 @@ public class Blob extends key_value_save {
     }
 
     public String getBlobKey(){
-        return key;
+        return this.key;
     }
 
     public String getBlobInput(){
@@ -27,6 +27,6 @@ public class Blob extends key_value_save {
     }
 
     public String toBlobString() {
-        return "100644 blob " + key;
+        return "100644 blob " + this.key;
     }
 }
