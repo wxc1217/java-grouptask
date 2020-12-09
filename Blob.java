@@ -1,5 +1,4 @@
 import java.io.*;
-import java.io.FileInputStream;
 
 public class Blob extends key_value_save {
     private String key; 
