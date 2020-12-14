@@ -13,7 +13,7 @@ public class Commit extends Hash {
 
         if(HEAD.exists()) {
             if(getPresentcommit()==rootDirKey){
-                System.out.println("ÎÄ¼şÎ´·¢Éú±ä¶¯£¬ÎŞĞècommit¡£" );
+                System.out.println("æ–‡ä»¶æœªå‘ç”Ÿå˜åŠ¨ï¼Œæ— éœ€commitã€‚" );
             }
             else{
                 createCommit(rootDirKey);
@@ -46,10 +46,10 @@ public class Commit extends Hash {
         try {
             file.createNewFile();
         } catch (IOException e) {
-            System.out.println("HEADÎÄ¼ş´´½¨Ê§°Ü¡£");
+            System.out.println("HEADæ–‡ä»¶åˆ›å»ºå¤±è´¥ã€‚");
             e.printStackTrace();
         }
-        updateHEAD(String rootDirKey)£»
+        updateHEAD(rootDirKey)ï¼›
     }
 
     public void updateHEAD(String rootDirKey){
@@ -60,30 +60,30 @@ public class Commit extends Hash {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            System.out.println("HEADÎÄ¼ş¸üĞÂÊ§°Ü¡£");
+            System.out.println("HEADæ–‡ä»¶æ›´æ–°å¤±è´¥ã€‚");
             e.printStackTrace();
         }
     }
 
     public String getAuthor(){
-        System.out.println("ÇëÊäÈë×÷Õß£º"); 
+        System.out.println("è¯·è¾“å…¥ä½œè€…ï¼š"); 
         Scanner input = new Scanner(System.in);
         String author = input.nextLine();
-        return author£»
+        return authorï¼›
     }
 
     public String getCommitter(){
-        System.out.println("ÇëÊäÈë¸Ã´ÎcommitµÄÌá½»Õß£º"); 
+        System.out.println("è¯·è¾“å…¥è¯¥æ¬¡commitçš„æäº¤è€…ï¼š"); 
         Scanner input = new Scanner(System.in);
         String committer = input.nextLine();
-        return committer£»
+        return committerï¼›
     }
 
     public String getUserInput(){
-        System.out.println("ÇëÊäÈë¸Ã´ÎcommitµÄ±¸×¢£º"); 
+        System.out.println("è¯·è¾“å…¥è¯¥æ¬¡commitçš„å¤‡æ³¨ï¼š"); 
         Scanner input = new Scanner(System.in);
         String UserInput = input.nextLine();
-        return UserInput£»
+        return UserInputï¼›
     }
 
     public String returnKey(){
