@@ -6,9 +6,8 @@ public class Commit extends Hash {
     private String value;
     private String presentcommit;
 
-    
     public Commit(String rootDirPath) throws Exception {
-        String rootDirKey=Hash.Treehash(rootDirPath)
+        String rootDirKey=Hash.prKVstore(rootDirPath)  //根据所给定工作区目录，对根文件夹进行遍历并返回对应key值；
         File HEAD=new File(Hash.objectpath + File.separator + "HEAD");
 
         if(HEAD.exists()) {
