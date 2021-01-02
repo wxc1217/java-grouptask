@@ -104,7 +104,7 @@ public class Hash {
     }
 
     /* 计算文件夹的Hash值 */
-    public static String Directoryhash(String value) {
+    public static String Treehash(String value) {
         // 显示特定文件Hash值
         StringBuilder result = new StringBuilder();
         try {
@@ -121,7 +121,7 @@ public class Hash {
     }
 
     /* 对当前文件夹进行遍历，储存文件及文件夹的key-value值 */
-    public static String Treehash(String path) throws IOException {
+    public static String Show_KVstore(String path) throws IOException {
         // 对文件夹进行深度优先遍历
         File dir = new File(path);
         System.out.println("Tree " + dir.getName() + " :");
@@ -147,7 +147,7 @@ public class Hash {
                 }
                 // 若为文件夹
                 if (f.isDirectory()) {
-                    key = Treehash(f.toString());
+                    key = Show_KVstore(f.toString());
                 }
                 // 将文件与文件夹的名称、Hash值记录在当前文件夹的ArrayList中
                 files.add(f.getName());
@@ -156,7 +156,7 @@ public class Hash {
         }
         // 将ArrayList转化为String类型返回
         String value = String.join(" ", files);
-        key = Directoryhash(value);
+        key = Treehash(value);
         // 存储key-value文件
         mystorage(key,value);
         System.out.println("Tree " + dir.getName() + " Hash值 " + key);
