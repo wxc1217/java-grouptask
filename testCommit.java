@@ -3,21 +3,23 @@ import java.util.Scanner;
 
 public class testCommit {
 	public static void main(String args[])throws IOException {
+		
         Scanner input = new Scanner(System.in);
-        System.out.println("ÇëÊäÈëCommit¸ùÄ¿Â¼Â·¾¶£º");
+        System.out.println("è¯·è¾“å…¥Commitæ ¹ç›®å½•è·¯å¾„ï¼š");
         String rootDirPath= input.next();
-        System.out.println("ÇëÊäÈë×÷ÕßÃû£º");
+        System.out.println("è¯·è¾“å…¥ä½œè€…åï¼š");
         String author= input.next();
-        System.out.println("ÇëÊäÈëÌá½»ÕßÃû£º");
+        System.out.println("è¯·è¾“å…¥æäº¤è€…åï¼š");
         String committer= input.next();
-        System.out.println("ÇëÊäÈë±¸×¢ĞÅÏ¢£º");
+        System.out.println("è¯·è¾“å…¥å¤‡æ³¨ä¿¡æ¯ï¼š");
         String message= input.next();
 
         Commit testCommit=new Commit(rootDirPath,author,committer,message);
         
-        System.out.println("±¾´ÎCommitµÄValueÎª£º"+testCommit.getValue());
-        System.out.println("±¾´ÎCommitµÄKeyÎª£º"+testCommit.getKey());
-
+        System.out.println("æœ¬æ¬¡Commitçš„Valueä¸ºï¼š"+testCommit.getValue());
+        System.out.println("æœ¬æ¬¡Commitçš„Keyä¸ºï¼š"+testCommit.getKey());
+	
+	input.close();
 	}
 
 }
