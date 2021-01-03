@@ -73,8 +73,8 @@ public class Commit extends Hash{
         }
         this.key = key;
 
-        //根据Key和Value创建Commit文件写入磁盘
-        Hash.writetofile(this.value,this.key);
+        //根据Key和Value储存为以key为名的Commit文件，写入磁盘
+        Hash.mystorage(this.key,this.value);
     }
 
     //从HEAD指针文件中读取上一次Commit的内容，也即上一次的根目录Key；
