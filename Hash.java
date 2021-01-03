@@ -8,12 +8,32 @@ import java.util.*;
 public class Hash {
     public static String objectpath = "E:\\MyGit\\object";
 
+    /* 创建程序所需要的储存空间 */
+    public static void initsetting()
+    {
+        String gitpath = "E:\\MyGit";
+        File file1 = new File(gitpath);
+        if(!file1.exists()){  //如果文件夹不存在
+            file1.mkdir();  //创建文件夹
+        }
+        String objpath = "E:\\MyGit\\object";
+        File file2 = new File(objpath);
+        if(!file2.exists()){  //如果文件夹不存在
+            file2.mkdir();  //创建文件夹
+        }
+        String branchpath = "E:\\MyGit\\branches";
+        File file3 = new File(branchpath);
+        if(!file3.exists()){  //如果文件夹不存在
+            file3.mkdir();  //创建文件夹
+        }
+    }
+
     /* 将key与value保存 */
-    public static void writetofile(String value, String key)
+    public static void writetofile(String value, String key, String objpath)
     {
         FileWriter writer;
         try {
-            writer =new FileWriter(objectpath + "\\" + key);
+            writer = new FileWriter(objpath + "\\" + key);
             writer.write(value);
             writer.flush();
             writer.close();
@@ -42,9 +62,9 @@ public class Hash {
     }
 
     /* key-value文件读取 */
-    public static String readObjectFromFile(String objectname)
+    public static String readObjectFromFile(String objectname , String path)
     {
-        File file = new File(objectpath + "\\" + objectname);
+        File file = new File(path + "\\" + objectname);
         String value = "";
         try {
             value = readFromTextFile(file);
@@ -60,7 +80,7 @@ public class Hash {
         File file = new File(objectpath + "\\" + key);
         //若对应键值不存在，说明文件已更新或未存储，则存储文件
         if(!file.exists()){
-            writetofile(value,key);
+            writetofile(value, key, objectpath);
         }
     }
 
@@ -124,6 +144,10 @@ public class Hash {
     public static String Show_KVstore(String path) throws IOException {
         // 对文件夹进行深度优先遍历
         File dir = new File(path);
+        if(!dir.exists()){
+            System.out.println("路径 " + path + " 出错");
+            return " ";
+        }
         System.out.println("Tree " + dir.getName() + " :");
         // 采用ArrayList记录该文件下文件与文件夹的名称与Hash值
         ArrayList<String> files = new ArrayList<>();
