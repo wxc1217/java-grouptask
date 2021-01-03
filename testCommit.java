@@ -18,7 +18,6 @@ public class testCommit {
 		
         System.out.println("本次Commit的Value为："+testCommit.getValue());
         System.out.println("本次Commit的Key为："+testCommit.getKey());
-		
 	input.close();
 	}
 
