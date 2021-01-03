@@ -39,7 +39,7 @@ public class Commit extends Hash{
             }    
         }
         else{ //若无HEAD文件，创建并设置previousCommit为空，创建Commit；
-            file.createNewFile();
+            HEAD.createNewFile();
             this.previousCommit="";
             createCommit(rootDirKey,author,committer,message);  
         }
@@ -68,6 +68,7 @@ public class Commit extends Hash{
 
     //从HEAD指针文件中读取上一次Commit的内容，也即上一次的根目录Key；
     public String readHEAD() throws IOException{
+        File HEAD=new File(Hash.objectpath + File.separator + "HEAD");
         this.previousCommit=Hash.readFromTextFile(HEAD);
         return previousCommit;
     }
