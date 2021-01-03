@@ -60,18 +60,7 @@ public class Commit extends Hash{
         this.value += this.message+"\n";
         
         //根据value计算key
-        StringBuilder key = new StringBuilder();
-        try {
-            ByteArrayInputStream is = new ByteArrayInputStream(this.value.getBytes());
-            byte[] sha1 = Hash.SHA1Checksum(is);
-            for (int i=0;i<sha1.length;i++) {
-                key.append(Integer.toString((sha1[i]>>4)&0x0F, 16));
-                key.append(Integer.toString(sha1[i]&0x0F, 16));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        this.key = key;
+        this.key=Hash.Treehash(this.value);
 
         //根据Key和Value储存为以key为名的Commit文件，写入磁盘
         Hash.mystorage(this.key,this.value);
