@@ -6,37 +6,37 @@ public class RollBack{
     private String rootTreeKey;
     private final String rollBackPath;
 
-    //ÎŞ²Î¹¹Ôì·½·¨,»Ø¹öÂ·¾¶³£Á¿Ä¬ÈÏÎªHashÀàÌá¹©µÄÄ¬ÈÏ¹¤×÷Â·¾¶£»
+    //æ— å‚æ„é€ æ–¹æ³•,å›æ»šè·¯å¾„å¸¸é‡é»˜è®¤ä¸ºHashç±»æä¾›çš„é»˜è®¤å·¥ä½œè·¯å¾„ï¼›
     public RollBack(){
         rollBackPath=Hash.objectpath;
     }
 
-    //ÒÔ¸ø¶¨commit key¡¢¸ø¶¨´¢´æÂ·¾¶Îª²ÎÊıµÄ¹¹Ôì·½·¨
+    //ä»¥ç»™å®šcommit keyã€ç»™å®šå‚¨å­˜è·¯å¾„ä¸ºå‚æ•°çš„æ„é€ æ–¹æ³•
     public RollBack(String givenCommitKey,String givenPath)throws Exception{
         
-        //¸ù¾İ¸ø¶¨Â·¾¶£¬¹¹³É»Ø¹ö²Ö¿â´¢´æÂ·¾¶£»
+        //æ ¹æ®ç»™å®šè·¯å¾„ï¼Œæ„æˆå›æ»šä»“åº“å‚¨å­˜è·¯å¾„ï¼›
         rollBackPath=givenPath + "\\.RollBackRepository";
         
-        //¼ì²é¸ø¶¨ÎÄ¼ş¼ĞÂ·¾¶ÏÂÊÇ·ñÒÑÓĞ£¬ÓĞÔòÉ¾³ı£»
+        //æ£€æŸ¥ç»™å®šæ–‡ä»¶å¤¹è·¯å¾„ä¸‹æ˜¯å¦å·²æœ‰ï¼Œæœ‰åˆ™åˆ é™¤ï¼›
         File[] folder = new File(givenPath).listFiles();
         for (File f: folder){
             if (!f.getName().equals(".RollBackRepository"))
                 deleteFolder(f);
         }
         
-        //¸ù¾İ¸ø¶¨commit key¹¹ÔìCommit¶ÔÏó£¬Ê¹ÓÃ·ÃÎÊÆ÷µÃµ½¸ùÄ¿Â¼treeµÄkey£»
+        //æ ¹æ®ç»™å®šcommit keyæ„é€ Commitå¯¹è±¡ï¼Œä½¿ç”¨è®¿é—®å™¨å¾—åˆ°æ ¹ç›®å½•treeçš„keyï¼›
         Commit rollBackCommit=new Commit(givenCommitKey);
         rootTreeKey=rollBackCommit.getRootTreeKey();
 
-        //½âÎö¸ùÄ¿Â¼TreeµÄKey£¬ÒÀ¾İ¸Ãtree¶ÔÏóËù´ú±íµÄÎÄ¼ş¼ĞÄÚµÄ×ÓÎÄ¼şÓë×ÓÎÄ¼ş¼ĞÃû³ÆÒÔ¼°¶ÔÓ¦µÄblob/tree key½øĞĞ»Ö¸´;
+        //è§£ææ ¹ç›®å½•Treeçš„Keyï¼Œä¾æ®è¯¥treeå¯¹è±¡æ‰€ä»£è¡¨çš„æ–‡ä»¶å¤¹å†…çš„å­æ–‡ä»¶ä¸å­æ–‡ä»¶å¤¹åç§°ä»¥åŠå¯¹åº”çš„blob/tree keyè¿›è¡Œæ¢å¤;
         recoverRollBack(rootTreeKey,rollBackPath);
 
-        //¸üĞÂHEADÖ¸Õë;
+        //æ›´æ–°HEADæŒ‡é’ˆ;
         rollBackCommit.updateHEAD(rootTreeKey);
     }
 
 
-    //¶Ôtree¶ÔÏóËù´ú±íµÄÎÄ¼ş¼ĞÄÚµÄ×ÓÎÄ¼şÓë×ÓÎÄ¼ş¼ĞÃû³ÆÒÔ¼°¶ÔÓ¦µÄblob/tree key½øĞĞ»Ö¸´;
+    //å¯¹treeå¯¹è±¡æ‰€ä»£è¡¨çš„æ–‡ä»¶å¤¹å†…çš„å­æ–‡ä»¶ä¸å­æ–‡ä»¶å¤¹åç§°ä»¥åŠå¯¹åº”çš„blob/tree keyè¿›è¡Œæ¢å¤;
     private void recoverRollBack(String rootTreeKey, String rollBackPath) throws Exception{
         String rootTreeKeyPath = rollBackPath +"\\"+ rootTreeKey;
         File treeNode = new File(rootTreeKeyPath);
@@ -62,14 +62,14 @@ public class RollBack{
                 File f = new File(rollBackPath + "\\" + list[2]);
                 if (!f.exists())
                     f.mkdir();
-                // µİ¹édfs
+                // é€’å½’dfs
                 recoverRollBack(list[1], rollBackPath + "\\" + list[2]);  
             }
             line = br.readLine();
         }
     }
 
-        //Çå³ıÒÑÓĞµÄÎÄ¼ş¼ĞµÄ·½·¨
+        //æ¸…é™¤å·²æœ‰çš„æ–‡ä»¶å¤¹çš„æ–¹æ³•
         private void deleteFolder(File f) throws Exception {
             if (!f.exists()) {
                 throw new Exception("No folder!");
@@ -87,10 +87,10 @@ public class RollBack{
             f.delete();
         }
     
-        //Õ¹Ê¾µ±Ç°ÀúÊ·CommitµÄÈÕÖ¾£»ÓÃÓÚ»Ø¹öÇ°²éÑ¯
+        //å±•ç¤ºå½“å‰å†å²Commitçš„æ—¥å¿—ï¼›ç”¨äºå›æ»šå‰æŸ¥è¯¢
         public void printCommitLog()throws IOException{
             Commit temp=new Commit();
-            String presentCommit=temp.readHEAD();//´ÓHEADÎÄ¼şÖĞ¶ÁÈ¡µ±Ç°CommitµÄkey
+            String presentCommit=temp.readHEAD();//ä»HEADæ–‡ä»¶ä¸­è¯»å–å½“å‰Commitçš„key
             Commit pCommit=new Commit(presentCommit);
 
             System.out.println(pCommit.getKey());
@@ -98,17 +98,18 @@ public class RollBack{
 
             String previousCommit = pCommit.getPreviousCommit();
 
-            while(previousCommit != null){ //µİ¹é±éÀú
+            while(previousCommit != null){ //é€’å½’éå†
 
                 Commit cCommit = new Commit(previousCommit);
 
                 System.out.println(cCommit.getKey());
                 System.out.println(cCommit.getValue());
                 
-                previousCommit = cCommit.getParent();
+                previousCommit = cCommit.getPreviousCommit();
+                }
         }
 
-        //·ÃÎÊÆ÷·½·¨
+        //è®¿é—®å™¨æ–¹æ³•
         public String getRootTreeKey(){
             return this.rootTreeKey;
         }
