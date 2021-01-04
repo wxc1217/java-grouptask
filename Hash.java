@@ -37,7 +37,6 @@ public class Hash {
             writer.write(value);
             writer.flush();
             writer.close();
-            System.out.println("存储:" + key);
         } catch (IOException e) {
             System.out.println("存储失败！");
             e.printStackTrace();
@@ -148,7 +147,6 @@ public class Hash {
             System.out.println("路径 " + path + " 出错");
             return " ";
         }
-        System.out.println("Tree " + dir.getName() + " :");
         // 采用ArrayList记录该文件下文件与文件夹的名称与Hash值
         ArrayList<String> files = new ArrayList<>();
         // 返回该文件夹中文件的抽象路径名数组
@@ -166,8 +164,12 @@ public class Hash {
                     key = Filehash(f);
                     String tempvalue = readFromTextFile(f);
                     // 将其key-value存储
+                    File file = new File(objectpath + "\\" + key);
+                    //若文件Hash值已更新或未存储，则显示Hash值
+                    if(!file.exists()){
+                        System.out.println("Blob " + f.getName() + " Hash值 " + key);
+                    }
                     mystorage(key,tempvalue);
-                    System.out.println("Blob " + f.getName() + " Hash值 " + key);
                 }
                 // 若为文件夹
                 if (f.isDirectory()) {
@@ -182,8 +184,13 @@ public class Hash {
         String value = String.join(" ", files);
         key = Treehash(value);
         // 存储key-value文件
+        File file = new File(objectpath + "\\" + key);
+        //若文件夹Hash值已更新或未存储，则显示Hash值
+        if(!file.exists()){
+            System.out.println("Tree " + dir.getName() + " Hash值 " + key);
+        }
         mystorage(key,value);
-        System.out.println("Tree " + dir.getName() + " Hash值 " + key);
         return key;
     }
 }
+
