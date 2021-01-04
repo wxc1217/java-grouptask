@@ -10,6 +10,30 @@ public class RollBack{
     public RollBack(){
         rollBackPath=Hash.objectpath;
     }
+    
+    //以给定commit key为参数的构造方法，此时回滚结果存储在默认工作路径下
+    public RollBack(String givenCommitKey)throws Exception{
+        
+        //在Hash类提供的默认工作路径下创建回滚仓库储存路径；
+        rollBackPath=Hash.objectpath + "\\.RollBackRepository";
+        
+        //检查给定文件夹路径下是否已有，有则删除；
+        File[] folder = new File(givenPath).listFiles();
+        for (File f: folder){
+            if (!f.getName().equals(".RollBackRepository"))
+                deleteFolder(f);
+        }
+        
+        //根据给定commit key构造Commit对象，使用访问器得到根目录tree的key；
+        Commit rollBackCommit=new Commit(givenCommitKey);
+        rootTreeKey=rollBackCommit.getRootTreeKey();
+
+        //解析根目录Tree的Key，依据该tree对象所代表的文件夹内的子文件与子文件夹名称以及对应的blob/tree key进行恢复;
+        recoverRollBack(rootTreeKey,rollBackPath);
+
+        //更新HEAD指针;
+        rollBackCommit.updateHEAD(rootTreeKey);
+    }
 
     //以给定commit key、给定储存路径为参数的构造方法
     public RollBack(String givenCommitKey,String givenPath)throws Exception{
