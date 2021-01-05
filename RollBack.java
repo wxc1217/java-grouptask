@@ -1,29 +1,28 @@
-import java.io.FileOutputStream;
-import java.io.FileinputStream;
+import java.io.*; 
 import java.lang.*;
 
 public class RollBack{
     private String rootTreeKey;
     private final String rollBackPath;
 
-    //无参构造方法,回滚路径常量默认为Hash类提供的默认工作路径；
+    //无参构造方法,无commit key，给定回滚路径常量默认为Hash类提供的默认工作路径；
     public RollBack(){
         rollBackPath=Hash.objectpath;
     }
-    
-    //以给定commit key为参数的构造方法，此时回滚结果存储在默认工作路径下
+
+    //以给定commit key为参数的构造方法，
     public RollBack(String givenCommitKey)throws Exception{
         
-        //检查给定文件夹路径下是否已有，有则删除；
-        File[] folder = new File(givenPath).listFiles();
+        //检查默认工作路径下是否已有回滚仓库，有则删除；
+        File[] folder = new File(Hash.objectpath).listFiles();
         for (File f: folder){
             if (!f.getName().equals(".RollBackRepository"))
                 deleteFolder(f);
         }
-        
+
         //在Hash类提供的默认工作路径下创建回滚仓库储存路径；
         rollBackPath=Hash.objectpath + "\\.RollBackRepository";
-         
+        
         //根据给定commit key构造Commit对象，使用访问器得到根目录tree的key；
         Commit rollBackCommit=new Commit(givenCommitKey);
         rootTreeKey=rollBackCommit.getRootTreeKey();
@@ -32,22 +31,22 @@ public class RollBack{
         recoverRollBack(rootTreeKey,rollBackPath);
 
         //更新HEAD指针;
-        rollBackCommit.updateHEAD(rootTreeKey);
+        rollBackCommit.updateHEAD(rollBackCommit.getKey());
     }
 
-    //以给定commit key、给定储存路径为参数的构造方法
+    //以给定commit key givenCommitKey、给定储存路径givenPath为参数的构造方法
     public RollBack(String givenCommitKey,String givenPath)throws Exception{
         
+        //检查给定文件夹路径下是否已有，有则删除；
+        File[] folder = new File(givenPath).listFiles();
+        for (File f: folder){
+            if (!f.getName().equals(".RollBackRepository"))
+                deleteFolder(f);
+        }
+
         //根据给定路径，构成回滚仓库储存路径；
         rollBackPath=givenPath + "\\.RollBackRepository";
         
-        //检查给定文件夹路径下是否已有，有则删除；
-        File[] folder = new File(givenPath).listFiles();
-        for (File f: folder){
-            if (!f.getName().equals(".RollBackRepository"))
-                deleteFolder(f);
-        }
-        
         //根据给定commit key构造Commit对象，使用访问器得到根目录tree的key；
         Commit rollBackCommit=new Commit(givenCommitKey);
         rootTreeKey=rollBackCommit.getRootTreeKey();
@@ -56,7 +55,7 @@ public class RollBack{
         recoverRollBack(rootTreeKey,rollBackPath);
 
         //更新HEAD指针;
-        rollBackCommit.updateHEAD(rootTreeKey);
+        rollBackCommit.updateHEAD(rollBackCommit.getKey());
     }
 
 
@@ -70,7 +69,7 @@ public class RollBack{
         while(line != null){
             String[] list = line.split(" ");
             if(list[0].equals("Blob")){
-                FileInputStream is = new FileInputStream(filePath+"\\"+list[1]);
+                FileInputStream is = new FileInputStream(rollBackPath+"\\"+list[1]);
                 FileOutputStream os = new FileOutputStream(rollBackPath+"\\"+list[2]);
                 byte[] buffer = new byte[1024];
                 int numRead = 0;
@@ -79,8 +78,6 @@ public class RollBack{
                     if (numRead > 0)
                         os.write(buffer, 0, numRead);
                 }
-                is.close();
-                os.close();
             }
             else if(list[0].equals("Tree")){
                 File f = new File(rollBackPath + "\\" + list[2]);
@@ -90,6 +87,9 @@ public class RollBack{
                 recoverRollBack(list[1], rollBackPath + "\\" + list[2]);  
             }
             line = br.readLine();
+            is.close();
+            os.close();
+            br.close();
         }
     }
 
@@ -130,7 +130,7 @@ public class RollBack{
                 System.out.println(cCommit.getValue());
                 
                 previousCommit = cCommit.getPreviousCommit();
-                }
+            }
         }
 
         //访问器方法
