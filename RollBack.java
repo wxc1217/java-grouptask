@@ -31,7 +31,7 @@ public class RollBack{
         recoverRollBack(rootTreeKey,rollBackPath);
 
         //更新HEAD指针;
-        rollBackCommit.updateHEAD(rollBackCommit.getKey());
+        rollBackCommit.updateHEAD(givenCommitKey);
     }
 
     //以给定commit key givenCommitKey、给定储存路径givenPath为参数的构造方法
