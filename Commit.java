@@ -1,15 +1,17 @@
 import java.io.*;
 import java.util.*;
 
-public class Commit extends Hash{
-    private String key; 
+public class Commit extends Hash implements Serializable{
+    private String key;
     private String value;
-    protected String previousCommit; 
-    protected String rootTreeKey;       
+    protected String previousCommit;
+    protected String rootTreeKey;
     protected String author;
-    protected String committer; 
+    protected String committer;
     protected String message;
     
+    //分支、object相关commit实现代码 by张楠@ZhangNan13
+
     //无参构造方法
     public Commit(){}
 
@@ -22,92 +24,80 @@ public class Commit extends Hash{
     public Commit(String rootDirPath,String author,String committer,String message) throws Exception {
         //根据所给定工作区目录，对根文件夹进行遍历并返回对应key值
         String rootDirKey=Hash.Show_KVstore(rootDirPath);
-        //创建HEAD File对象
-        File HEAD=new File(Hash.objectpath + File.separator + "HEAD");
-
-        //判定工作目录下是否已有HEAD文件，分情况处理
-        if(HEAD.exists()) {
-            String lastCommit=readHEAD();
-            String lastRootDirKey=readRootTreeKey(lastCommit);
-
-            if(lastRootDirKey==rootDirKey){ //若有HEAD文件且根目录Key与上次Commit中储存的根目录Key相同，则为重复提交，提示用户即可；
-                System.out.println("文件未发生变动，无需commit。" );
+        // 查找当前分支
+        String branchname = Branch.branchcheck();
+        // 若分支存在，创建commit并提交新内容
+        if(branchname != "") {
+            String lastCommitid = Branch.branchcommit();
+            Commit lastCommit = new Commit();
+            if(lastCommitid != ""){
+                lastCommit = (Commit) readCommitFromFile(lastCommitid, Hash.objectpath);
+                String lastRootDirKey = lastCommit.getRootTreeKey();
+                //若与上次Commit中储存的根目录Key相同，则为重复提交，提示用户即可；
+                if(lastRootDirKey==rootDirKey){
+                    System.out.println("文件未发生变动，无需commit。" );
+                }else{//若根目录Key不同，读入previousCommit，创建Commit，更新分支信息；
+                    this.previousCommit=lastCommit.getKey();
+                }
             }
-            else{//若有HEAD文件且根目录Key不同，读入previousCommit，创建Commit，更新HEAD指针文件；
-                this.previousCommit=lastCommit.getKey();
-                createCommit(rootDirKey,author,committer,message);
-            }    
         }
-        else{ //若无HEAD文件，创建并设置previousCommit为空，创建Commit；
-            file.createNewFile();
-            this.previousCommit="";
-            createCommit(rootDirKey,author,committer,message);  
-        }
-    } 
-
-    //创建Commit
-    public void createCommit(String rootDirKey,String author,String committer,String message){
         this.author=author;
         this.committer=committer;
         this.message=message;
-        this.rootTreeKey=rootDirKey;
-
+        this.rootTreeKey= Hash.Show_KVstore(rootDirPath);
         this.value ="";
         this.value += "tree " + this.rootTreeKey + "\n";
         this.value += "parent " + this.previousCommit+ "\n";
         this.value += "author " + this.author + "\n";
         this.value += "committer " + getCommitter() + "\n";
         this.value += this.message+"\n";
-        
-        //根据value计算key
-        StringBuilder key = new StringBuilder();
-        try {
-            ByteArrayInputStream is = new ByteArrayInputStream(this.value.getBytes());
-            byte[] sha1 = Hash.SHA1Checksum(is);
-            for (int i=0;i<sha1.length;i++) {
-                key.append(Integer.toString((sha1[i]>>4)&0x0F, 16));
-                key.append(Integer.toString(sha1[i]&0x0F, 16));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        this.key = key;
-
-        //根据Key和Value创建Commit文件写入磁盘
-        Hash.mystorage(this.key,this.value);
-
-        //更新HEAD指针
-        updateHEAD(this.key);
+        this.key = Treehash(value);
     }
 
-    //从HEAD指针文件中读取上一次Commit的内容,也即上一次Commit的key；
-    public String readHEAD() throws IOException{
-        File head=new File(Hash.objectpath + File.separator + "HEAD");
-        this.previousCommit=Hash.readFromTextFile(head);
-        return previousCommit;
+    //创建Commit
+    public void createCommit(Commit c){
+        //创建Commit对象写入文件
+        Object o = (Object) c;
+        writeCommitToFile(o, c.key, Hash.objectpath);
+        //更新分支信息
+        Branch.commitupdate(c.key);
     }
 
-    //更新HEAD，覆盖写入本次的根目录Key；
-    public void updateHEAD(String key){
+    /* object对象保存方法 */
+    public static void writeCommitToFile(Object obj, String name,  String objpath)
+    {
+        File file =new File(objpath + "\\" + name);
+        FileOutputStream out;
         try {
-            FileWriter writer;
-            writer =new FileWriter(Hash.objectpath + File.separator + "HEAD");
-            writer.write(key);
-            writer.flush();
-            writer.close();
+            out = new FileOutputStream(file);
+            ObjectOutputStream objOut=new ObjectOutputStream(out);
+            objOut.writeObject(obj);
+            objOut.flush();
+            objOut.close();
         } catch (IOException e) {
-            System.out.println("HEAD文件更新失败。");
+            System.out.println("存储失败！");
             e.printStackTrace();
         }
-    }   
+    }
 
-    private String readRootTreeKey(String CommitKey)throws IOException{
-        File commitFile = new File(Hash.objectpath + "\\" + CommitKey);
-        Scanner input_read = new Scanner(commitFile);
-        String rTsign = input_read.next();
-        String rTKey = input_read.next();
-        return rTKey;
-        input_read.close();
+    /* object对象读取方法 */
+    public static Object readCommitFromFile(String objectname , String path)
+    {
+        Object temp=null;
+        File file =new File(path + "\\" + objectname);
+        FileInputStream in;
+        try {
+            in = new FileInputStream(file);
+            ObjectInputStream objIn=new ObjectInputStream(in);
+            temp=objIn.readObject();
+            objIn.close();
+        } catch (IOException e) {
+            System.out.println("读取失败！");
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return temp;
     }
 
     //访问器：get方法
