@@ -31,7 +31,8 @@ public class RollBack{
         recoverRollBack(rootTreeKey,rollBackPath);
 
         //更新HEAD指针;
-        rollBackCommit.updateHEAD(givenCommitKey);
+        Commit forupdate=new Commit();
+        forupdate.updateHEAD(givenCommitKey);
     }
 
     //以给定commit key givenCommitKey、给定储存路径givenPath为参数的构造方法
@@ -54,7 +55,8 @@ public class RollBack{
         recoverRollBack(rootTreeKey,rollBackPath);
 
         //更新HEAD指针;
-        rollBackCommit.updateHEAD(givenCommitKey);
+        Commit forupdate=new Commit();
+        forupdate.updateHEAD(givenCommitKey);
     }
 
     //根据所给commit key读取对应commit文件内容，获得第一行第二个标记符读取的根目录Tree的key
