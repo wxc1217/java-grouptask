@@ -26,6 +26,11 @@ public class Hash {
         if(!file3.exists()){  //如果文件夹不存在
             file3.mkdir();  //创建文件夹
         }
+        String srcpath = "E:\\MyGit\\src";
+        File file4 = new File(srcpath);
+        if(!file4.exists()){  //如果文件夹不存在
+            file4.mkdir();  //创建文件夹
+        }
     }
 
     /* 将key与value保存 */
@@ -164,11 +169,6 @@ public class Hash {
                     key = Filehash(f);
                     String tempvalue = readFromTextFile(f);
                     // 将其key-value存储
-                    File file = new File(objectpath + "\\" + key);
-                    //若文件Hash值已更新或未存储，则显示Hash值
-                    if(!file.exists()){
-                        System.out.println("Blob " + f.getName() + " Hash值 " + key);
-                    }
                     mystorage(key,tempvalue);
                 }
                 // 若为文件夹
@@ -184,11 +184,6 @@ public class Hash {
         String value = String.join(" ", files);
         key = Treehash(value);
         // 存储key-value文件
-        File file = new File(objectpath + "\\" + key);
-        //若文件夹Hash值已更新或未存储，则显示Hash值
-        if(!file.exists()){
-            System.out.println("Tree " + dir.getName() + " Hash值 " + key);
-        }
         mystorage(key,value);
         return key;
     }
