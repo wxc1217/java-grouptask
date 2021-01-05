@@ -27,8 +27,8 @@ public class Commit extends Hash{
 
         //判定工作目录下是否已有HEAD文件，分情况处理
         if(HEAD.exists()) {
-            Commit lastCommit=new Commit(readHEAD());
-            String lastRootDirKey=lastCommit.getRootTreeKey();
+            String lastCommit=readHEAD();
+            String lastRootDirKey=readRootTreeKey(lastCommit);
 
             if(lastRootDirKey==rootDirKey){ //若有HEAD文件且根目录Key与上次Commit中储存的根目录Key相同，则为重复提交，提示用户即可；
                 System.out.println("文件未发生变动，无需commit。" );
@@ -80,7 +80,7 @@ public class Commit extends Hash{
         updateHEAD(this.key);
     }
 
-    //从HEAD指针文件中读取上一次Commit的内容，也即上一次的根目录Key；
+    //从HEAD指针文件中读取上一次Commit的内容,也即上一次Commit的key；
     public String readHEAD() throws IOException{
         File head=new File(Hash.objectpath + File.separator + "HEAD");
         this.previousCommit=Hash.readFromTextFile(head);
@@ -100,6 +100,15 @@ public class Commit extends Hash{
             e.printStackTrace();
         }
     }   
+
+    private String readRootTreeKey(String CommitKey)throws IOException{
+        File commitFile = new File(Hash.objectpath + "\\" + CommitKey);
+        Scanner input_read = new Scanner(commitFile);
+        String rTsign = input_read.next();
+        String rTKey = input_read.next();
+        return rTKey;
+        input_read.close();
+    }
 
     //访问器：get方法
 
