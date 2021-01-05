@@ -54,12 +54,12 @@ public class RollBack{
         recoverRollBack(rootTreeKey,rollBackPath);
 
         //更新HEAD指针;
-        rollBackCommit.updateHEAD(rollBackCommit.getKey());
+        rollBackCommit.updateHEAD(givenCommitKey);
     }
 
     //根据所给commit key读取对应commit文件内容，获得第一行第二个标记符读取的根目录Tree的key
     private String readRootTreeKey(String givenCommitKey){
-        File Commitfile = new File(objectpath + "\\" + givenCommitKey);
+        File Commitfile = new File(Hash.objectpath + "\\" + givenCommitKey);
         Scanner input_read = new Scanner(Commitfile);
         String rTsign = input_read.next();
         String rTKey = input_read.next();
@@ -85,6 +85,8 @@ public class RollBack{
                     numRead = is.read(buffer);
                     if (numRead > 0)
                         os.write(buffer, 0, numRead);
+                is.close();
+                os.close();
                 }
             }
             else if(list[0].equals("Tree")){
@@ -95,8 +97,6 @@ public class RollBack{
                 recoverRollBack(list[1], rollBackPath + "\\" + list[2]);  
             }
             line = br.readLine();
-            is.close();
-            os.close();
             br.close();
         }
     }
@@ -126,7 +126,7 @@ public class RollBack{
             String pCommit=presentCommit;
 
             while(pCommit!=null){ //递归遍历并显示
-                File pCommitfile=new File(objectpath + "\\" + pCommit);
+                File pCommitfile=new File(Hash.objectpath + "\\" + pCommit);
                 Scanner input_log= new Scanner(pCommitfile);
                 String treeKey = input_log.nextLine();
                 String sign= input_log.next();
