@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class CommitTest{
     public static void main(String[] args) {
-        // 首次运行时须运行此部分，避免出错 (此部分by张楠 @ZhangNan13）
+        // 首次运行时须运行此部分，避免出错 ————此部分by张楠 @ZhangNan13
         //Hash.initsetting();
         //Branch.branchcreate("main","");
         //Branch.branchchange("main");
