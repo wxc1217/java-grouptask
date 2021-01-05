@@ -60,7 +60,7 @@ public class RollBack{
     }
 
     //根据所给commit key读取对应commit文件内容，获得第一行第二个标记符读取的根目录Tree的key
-    private String readRootTreeKey(String givenCommitKey){
+    private String readRootTreeKey(String givenCommitKey)throws IOException{
         File Commitfile = new File(Hash.objectpath + "\\" + givenCommitKey);
         Scanner input_read = new Scanner(Commitfile);
         String rTsign = input_read.next();
