@@ -82,7 +82,8 @@ public class Commit extends Hash{
 
     //从HEAD指针文件中读取上一次Commit的内容，也即上一次的根目录Key；
     public String readHEAD() throws IOException{
-        this.previousCommit=Hash.readFromTextFile(HEAD);
+        File head=new File(Hash.objectpath + File.separator + "HEAD");
+        this.previousCommit=Hash.readFromTextFile(head);
         return previousCommit;
     }
 
