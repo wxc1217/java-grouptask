@@ -1,5 +1,6 @@
 import java.io.*; 
 import java.lang.*;
+import java.util.Scanner;
 
 public class RollBack{
     private String rootTreeKey;
@@ -24,8 +25,7 @@ public class RollBack{
         rollBackPath=Hash.objectpath + "\\.RollBackRepository";
         
         //根据给定commit key构造Commit对象，使用访问器得到根目录tree的key；
-        Commit rollBackCommit=new Commit(givenCommitKey);
-        rootTreeKey=rollBackCommit.getRootTreeKey();
+        rootTreeKey=readRootTreeKey(givenCommitKey);
 
         //解析根目录Tree的Key，依据该tree对象所代表的文件夹内的子文件与子文件夹名称以及对应的blob/tree key进行恢复;
         recoverRollBack(rootTreeKey,rollBackPath);
@@ -48,8 +48,7 @@ public class RollBack{
         rollBackPath=givenPath + "\\.RollBackRepository";
         
         //根据给定commit key构造Commit对象，使用访问器得到根目录tree的key；
-        Commit rollBackCommit=new Commit(givenCommitKey);
-        rootTreeKey=rollBackCommit.getRootTreeKey();
+        rootTreeKey=readRootTreeKey(givenCommitKey);
 
         //解析根目录Tree的Key，依据该tree对象所代表的文件夹内的子文件与子文件夹名称以及对应的blob/tree key进行恢复;
         recoverRollBack(rootTreeKey,rollBackPath);
@@ -58,6 +57,15 @@ public class RollBack{
         rollBackCommit.updateHEAD(rollBackCommit.getKey());
     }
 
+    //根据所给commit key读取对应commit文件内容，获得第一行第二个标记符读取的根目录Tree的key
+    private String readRootTreeKey(String givenCommitKey){
+        File Commitfile = new File(objectpath + "\\" + givenCommitKey);
+        Scanner input_read = new Scanner(Commitfile);
+        String rTsign = input_read.next();
+        String rTKey = input_read.next();
+        return rTKey;
+        input_read.close();
+    }
 
     //对tree对象所代表的文件夹内的子文件与子文件夹名称以及对应的blob/tree key进行恢复;
     private void recoverRollBack(String rootTreeKey, String rollBackPath) throws Exception{
@@ -93,7 +101,7 @@ public class RollBack{
         }
     }
 
-        //清除已有的文件夹的方法
+        //清除已有的文件夹
         private void deleteFolder(File f) throws Exception {
             if (!f.exists()) {
                 throw new Exception("No folder!");
@@ -112,24 +120,22 @@ public class RollBack{
         }
     
         //展示当前历史Commit的日志；用于回滚前查询
-        public void printCommitLog()throws IOException{
+        public static void printCommitLog()throws IOException{
             Commit temp=new Commit();
             String presentCommit=temp.readHEAD();//从HEAD文件中读取当前Commit的key
-            Commit pCommit=new Commit(presentCommit);
+            String pCommit=presentCommit;
 
-            System.out.println(pCommit.getKey());
-            System.out.println(pCommit.getValue());
-
-            String previousCommit = pCommit.getPreviousCommit();
-
-            while(previousCommit != null){ //递归遍历
-
-                Commit cCommit = new Commit(previousCommit);
-
-                System.out.println(cCommit.getKey());
-                System.out.println(cCommit.getValue());
-                
-                previousCommit = cCommit.getPreviousCommit();
+            while(pCommit!=null){ //递归遍历并显示
+                File pCommitfile=new File(objectpath + "\\" + pCommit);
+                Scanner input_log= new Scanner(pCommitfile);
+                String treeKey = input_log.nextLine();
+                String sign= input_log.next();
+                String previousCommit= input_log.next();
+		        input_log.close();
+                System.out.println(pCommit);
+                System.out.println(Hash.readFromTextFile(pCommitfile));
+                pCommit=previousCommit;
+                input_log.close();
             }
         }
 
