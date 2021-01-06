@@ -28,7 +28,7 @@ public class Branch extends Hash{
     }
 
     /* 查找当前分支最新提交 */
-    public static void branchcommit(){
+    public static String branchcommit(){
         String bname = branchcheck();
         String commitid = "";
         if(bname != ""){
