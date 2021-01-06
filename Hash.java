@@ -8,16 +8,40 @@ import java.util.*;
 public class Hash {
     public static String objectpath = "E:\\MyGit\\object";
 
+    /* 创建程序所需要的储存空间 */
+    public static void initsetting()
+    {
+        String gitpath = "E:\\MyGit";
+        File file1 = new File(gitpath);
+        if(!file1.exists()){  //如果文件夹不存在
+            file1.mkdir();  //创建文件夹
+        }
+        String objpath = "E:\\MyGit\\object";
+        File file2 = new File(objpath);
+        if(!file2.exists()){  //如果文件夹不存在
+            file2.mkdir();  //创建文件夹
+        }
+        String branchpath = "E:\\MyGit\\branches";
+        File file3 = new File(branchpath);
+        if(!file3.exists()){  //如果文件夹不存在
+            file3.mkdir();  //创建文件夹
+        }
+        String srcpath = "E:\\MyGit\\src";
+        File file4 = new File(srcpath);
+        if(!file4.exists()){  //如果文件夹不存在
+            file4.mkdir();  //创建文件夹
+        }
+    }
+
     /* 将key与value保存 */
-    public static void writetofile(String value, String key)
+    public static void writetofile(String value, String key, String objpath)
     {
         FileWriter writer;
         try {
-            writer =new FileWriter(objectpath + "\\" + key);
+            writer = new FileWriter(objpath + "\\" + key);
             writer.write(value);
             writer.flush();
             writer.close();
-            System.out.println("存储:" + key);
         } catch (IOException e) {
             System.out.println("存储失败！");
             e.printStackTrace();
@@ -37,14 +61,14 @@ public class Hash {
             line = br.readLine();
         }
         // 将ArrayList转化为String类型返回
-        String listString = String.join(" ",strArray);
+        String listString = String.join("\r\n",strArray);
         return listString;
     }
 
     /* key-value文件读取 */
-    public static String readObjectFromFile(String objectname)
+    public static String readObjectFromFile(String objectname , String path)
     {
-        File file = new File(objectpath + "\\" + objectname);
+        File file = new File(path + "\\" + objectname);
         String value = "";
         try {
             value = readFromTextFile(file);
@@ -60,7 +84,7 @@ public class Hash {
         File file = new File(objectpath + "\\" + key);
         //若对应键值不存在，说明文件已更新或未存储，则存储文件
         if(!file.exists()){
-            writetofile(value,key);
+            writetofile(value, key, objectpath);
         }
     }
 
@@ -104,7 +128,7 @@ public class Hash {
     }
 
     /* 计算文件夹的Hash值 */
-    public static String Directoryhash(String value) {
+    public static String Treehash(String value) {
         // 显示特定文件Hash值
         StringBuilder result = new StringBuilder();
         try {
@@ -121,12 +145,14 @@ public class Hash {
     }
 
     /* 对当前文件夹进行遍历，储存文件及文件夹的key-value值 */
-    public static String prKVstore(String path) throws IOException {
+    public static String Show_KVstore(String path) throws IOException {
         // 对文件夹进行深度优先遍历
         File dir = new File(path);
-        System.out.println("Tree " + dir.getName() + " :");
-        // 采用ArrayList记录该文件下文件与文件夹的名称与Hash值
-        ArrayList<String> files = new ArrayList<>();
+        if(!dir.exists()){
+            System.out.println("路径 " + path + " 出错");
+            return " ";
+        }
+        String value = "";
         // 返回该文件夹中文件的抽象路径名数组
         File[] fs = dir.listFiles();
         String key = "";
@@ -142,63 +168,33 @@ public class Hash {
                     key = Filehash(f);
                     String tempvalue = readFromTextFile(f);
                     // 将其key-value存储
+                    File file = new File(objectpath + "\\" + key);
+                    //若文件Hash值已更新或未存储，则显示Hash值
+                    if(!file.exists()){
+                        System.out.println("Blob " + f.getName() + " Hash值 " + key);
+                    }
                     mystorage(key,tempvalue);
-                    System.out.println("Blob " + f.getName() + " Hash值 " + key);
+                    value = value + " " + "Blob";
                 }
                 // 若为文件夹
                 if (f.isDirectory()) {
-                    key = prKVstore(f.toString());
+                    key = Show_KVstore(f.toString());
+                    value = value + " " + "Tree";
                 }
                 // 将文件与文件夹的名称、Hash值记录在当前文件夹的ArrayList中
-                files.add(f.getName());
-                files.add(key);
+                value = value + " " + key;
+                value = value + " " + f.getName() + "\r\n";
             }
         }
         // 将ArrayList转化为String类型返回
-        String value = String.join(" ", files);
-        key = Directoryhash(value);
+        key = Treehash(value);
         // 存储key-value文件
-        mystorage(key,value);
-        System.out.println("Tree " + dir.getName() + " Hash值 " + key);
-        return key;
-    }
-    public static String KVstore(String path) throws IOException {
-        // 对文件夹进行深度优先遍历
-        File dir = new File(path);
-        // 采用ArrayList记录该文件下文件与文件夹的名称与Hash值
-        ArrayList<String> files = new ArrayList<>();
-        // 返回该文件夹中文件的抽象路径名数组
-        File[] fs = dir.listFiles();
-        String key = "";
-        if(fs != null) {
-            // 采用ArrayList对listFiles()的结果进行排序
-            ArrayList<File> paths = new ArrayList<>();
-            Collections.addAll(paths, fs);
-            paths.sort(Comparator.naturalOrder());
-            for(File f : paths) {
-                // 若为文件
-                if (f.isFile()) {
-                    // 计算Hash值并储存
-                    key = Filehash(f);
-                    String tempvalue = readFromTextFile(f);
-                    // 将其key-value存储
-                    mystorage(key,tempvalue);
-                }
-                // 若为文件夹
-                if (f.isDirectory()) {
-                    key = KVstore(f.toString());
-                }
-                // 将文件与文件夹的名称、Hash值记录在当前文件夹的ArrayList中
-                files.add(f.getName());
-                files.add(key);
-            }
+        File file = new File(objectpath + "\\" + key);
+        //若文件夹Hash值已更新或未存储，则显示Hash值
+        if(!file.exists()){
+            System.out.println("Tree " + dir.getName() + " Hash值 " + key);
         }
-        // 将ArrayList转化为String类型返回
-        String value = String.join(" ", files);
-        key = Directoryhash(value);
-        // 存储key-value文件
         mystorage(key,value);
         return key;
     }
 }
-
