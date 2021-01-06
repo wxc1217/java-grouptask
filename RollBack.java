@@ -33,9 +33,8 @@ import java.util.Scanner;
             //解析根目录Tree的Key，依据该tree对象所代表的文件夹内的子文件与子文件夹名称以及对应的blob/tree key进行恢复;
             recoverRollBack ( rootTreeKey , rollBackPath );
 
-            //更新HEAD指针;
-            Commit forupdate = new Commit ( );
-            forupdate.updateHEAD ( givenCommitKey );
+            //更新分支信息（更新指针）
+            Branch.commitupdate(givenCommitKey);
         }
 
         //以给定commit key givenCommitKey、给定储存路径givenPath为参数的构造方法
@@ -60,9 +59,8 @@ import java.util.Scanner;
             //解析根目录Tree的Key，依据该tree对象所代表的文件夹内的子文件与子文件夹名称以及对应的blob/tree key进行恢复;
             recoverRollBack ( rootTreeKey , rollBackPath );
 
-            //更新HEAD指针;
-            Commit forupdate = new Commit ( );
-            forupdate.updateHEAD ( givenCommitKey );
+            //更新分支信息（更新指针）
+            Branch.commitupdate(givenCommitKey);
         }
 
         //根据所给commit key读取对应commit文件内容，获得第一行第二个标记符读取的根目录Tree的key
@@ -101,7 +99,7 @@ import java.util.Scanner;
                     if ( ! f.exists ( ) ) {
                         f.mkdir();
                     }
-                    // dfs
+                    // �ݹ�dfs
                     recoverRollBack ( list[ 1 ] , rollBackPath + "\\" + list[ 2 ] );
                 }
                 line = br.readLine ( );
@@ -129,20 +127,25 @@ import java.util.Scanner;
 
         //展示当前历史Commit的日志；用于回滚前查询
         public static void printCommitLog ( ) throws IOException {
-            Commit temp = new Commit ( );
-            //从HEAD文件中读取当前Commit的key
-            String presentCommit = temp.readHEAD ( );
+
+            //从Branch文件(指针）中读取当前分支最新的Commit key
+            String branchName = Branch.branchcheck();
+            String presentCommit = "";
+            if(branchName != "") {
+                presentCommit = Hash.readObjectFromFile ( branchName, "E:\\MyGit\\branches" );
+            }
             String pCommit = presentCommit;
 
             //递归遍历并显示
             while ( pCommit != null ) {
-                File pCommitfile = new File ( Hash.objectpath + "\\" + pCommit );
-                Scanner input_log = new Scanner ( pCommitfile );
-                String treeKey = input_log.nextLine ( );
-                String sign = input_log.next ( );
+                File pCommitFile = new File ( Hash.objectpath + "\\" + pCommit );
+                Scanner input_log = new Scanner ( pCommitFile );
+                String tsign =input_log.next( );
+                String treeKey = input_log.next( );
+                String psign = input_log.next ( );
                 String previousCommit = input_log.next ( );
                 System.out.println ( pCommit );
-                System.out.println ( Hash.readFromTextFile ( pCommitfile ) );
+                System.out.println ( Hash.readFromTextFile ( pCommitFile ) );
                 pCommit = previousCommit;
                 input_log.close ( );
             }
