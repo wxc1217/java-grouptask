@@ -31,8 +31,8 @@ public class testforhash {
             Scanner input3 = new Scanner(System.in);
             String path = input3.next();
             // 遍历文件夹，存储key-value
-            Hash.KVstore(path);
-            Hash.prKVstore(path);
+            //Hash.KVstore(path);
+            Hash.Show_KVstore(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -45,7 +45,7 @@ public class testforhash {
             System.out.println("请输入文件key值：");
             Scanner input4 = new Scanner(System.in);
             String key = input4.next();
-            System.out.println(Hash.readObjectFromFile(key));
+            System.out.println(Hash.readObjectFromFile(key,Hash.objectpath));
         } catch (Exception e) {
             e.printStackTrace();
         }

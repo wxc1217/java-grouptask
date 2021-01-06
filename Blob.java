@@ -9,11 +9,11 @@ public class Blob {
     public static String addPath;
     /*读取文件路径，生成对应的文件（文件名为key，文件内容是value）*/
     public static void Blob(String path) throws IOException {
-        Hash.KVstore(path);
+        Hash.Show_KVstore(path);
     }
     /*按照key去寻找value*/
     public static String SearchValue(String name) throws IOException{
-        return Hash.readObjectFromFile(name);
+        return Hash.readObjectFromFile(name,Hash.objectpath);
     }
     /*新增对应文件，生成对应的KV存储文件*/
     public static void add(String addPath) throws IOException{
@@ -21,6 +21,6 @@ public class Blob {
         File dir = new File(path + "\\" + addPath);
         String key = "";
         Hash.Filehash(dir);
-        Hash.KVstore(Hash.objectpath);
+        Hash.Show_KVstore(Hash.objectpath);
     }
 }

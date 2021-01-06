@@ -7,7 +7,7 @@ public class Tree {
     private String path;
     /*直接按照路径构造tree*/
     public static void Tree(String path) throws IOException{
-        Hash.KVstore(path);
+        Hash.Show_KVstore(path);
     }
 
 }

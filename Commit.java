@@ -1,99 +1,141 @@
 import java.io.*;
 import java.util.*;
 
-public class Commit {
-    private String key; 
+public class Commit extends Hash implements Serializable{
+    private String key;
     private String value;
-    private String presentcommit;
-    
-    public Commit(String rootDirPath) throws Exception {
-        String rootDirKey=Hash.prKVstore(rootDirPath)  //根据所给定工作区目录，对根文件夹进行遍历并返回对应key值；
-        File HEAD=new File(Hash.objectpath + File.separator + "HEAD");
+    protected String previousCommit;
+    protected String rootTreeKey;
+    protected String author;
+    protected String committer;
+    protected String message;
 
-        if(HEAD.exists()) {
-            if(getPresentcommit()==rootDirKey){
-                System.out.println("文件未发生变动，无需commit。" );
-            }
-            else{
-                createCommit(rootDirKey);
-                updateHEAD(rootDirKey);
-            }    
-        }
-        else{
-            createCommit(rootDirKey);
-            createHEAD(rootDirKey);
-        }  
-    } 
+    //无参构造方法
+    public Commit(){}
 
-    public void createCommit(String rootDirKey){
+    //仅给定Commit的Key的构造方法
+    public Commit(String givenCommitKey){
+        this.key=givenCommitKey;
+    }
+
+    //给定根目录路径、作者信息、提交者信息、备注信息4个字符串参数的构造方法
+    public Commit(String rootDirKey,String author,String committer,String message,String previousCommit) throws Exception{
+        this.previousCommit = previousCommit;
+        this.author=author;
+        this.committer=committer;
+        this.message=message;
+        this.rootTreeKey= rootDirKey;
         this.value ="";
-        this.value += "tree " + rootDirKey + "\n";
-        this.value += "parent " + getPresentcommit()+ "\n";
-        this.value += "author " + getAuthor() + "\n";
+        this.value += "tree " + this.rootTreeKey + "\n";
+        this.value += "parent " + this.previousCommit+ "\n";
+        this.value += "author " + this.author + "\n";
         this.value += "committer " + getCommitter() + "\n";
-        this.value += getUserInput()+"\n";
-        this.key = Hash.showhash(value);
-        Hash.mystorage(String this.key, String this.value);
+        this.value += this.message+"\n";
+        this.key = Treehash(value);
+
     }
 
-    public String getPresentcommit() throws IOException{
-        this.presentcommit=Hash.readObjectFromFile(File HEAD);
-        return presentcommit;
+    //创建Commit
+    public static Commit createCommit(String rootDirPath,String author,String committer,String message) throws Exception {
+        Commit nCommit = new Commit();
+        //根据所给定工作区目录，对根文件夹进行遍历并返回对应key值
+        String rootDirKey = Hash.Show_KVstore(rootDirPath);
+        // 查找当前分支
+        String branchname = Branch.branchcheck();
+        // 若分支存在，创建commit并提交新内容
+        if(branchname != "") {
+            String lastCommitid = Branch.branchcommit();
+            if(lastCommitid != ""){
+                Commit lastCommit = (Commit) readCommitFromFile(lastCommitid, Hash.objectpath);
+                String lastRootDirKey = lastCommit.getRootTreeKey();
+                //若与上次Commit中储存的根目录Key相同，则为重复提交，提示用户即可；
+                if(lastRootDirKey.equals(rootDirKey)){
+                    System.out.println("文件未发生变动，无需commit。" );
+                }else{//若根目录Key不同，读入previousCommit，创建Commit，更新分支信息；
+                    String previousCommit = lastCommit.getKey();
+                    //创建Commit对象写入文件
+                    nCommit = new Commit(rootDirKey,author,committer,message,previousCommit);
+                    Object o = (Object) nCommit;
+                    writeCommitToFile(o, nCommit.key, Hash.objectpath);
+                    //更新分支信息
+                    Branch.commitupdate(nCommit.key);
+                }
+            }else{
+                //创建Commit对象写入文件
+                nCommit = new Commit(rootDirKey,author,committer,message,null);
+                Object o = (Object) nCommit;
+                writeCommitToFile(o, nCommit.key, Hash.objectpath);
+                //更新分支信息
+                Branch.commitupdate(nCommit.key);
+            }
+        }
+        return nCommit;
     }
 
-    public void createHEAD(String rootDirKey){
+    /* object对象保存方法 */
+    public static void writeCommitToFile(Object obj, String name,  String objpath)
+    {
+        File file =new File(objpath + "\\" + name);
+        FileOutputStream out;
         try {
-            file.createNewFile();
+            out = new FileOutputStream(file);
+            ObjectOutputStream objOut=new ObjectOutputStream(out);
+            objOut.writeObject(obj);
+            objOut.flush();
+            objOut.close();
         } catch (IOException e) {
-            System.out.println("HEAD文件创建失败。");
+            System.out.println("存储失败！");
             e.printStackTrace();
         }
-        updateHEAD(rootDirKey)；
     }
 
-    public void updateHEAD(String rootDirKey){
+    /* object对象读取方法 */
+    public static Object readCommitFromFile(String objectname , String path)
+    {
+        Object temp=null;
+        File file =new File(path + "\\" + objectname);
+        FileInputStream in;
         try {
-            FileWriter writer;
-            writer =new FileWriter(Hash.objectpath + File.separator + "HEAD");
-            writer.write(rootDirKey);
-            writer.flush();
-            writer.close();
+            in = new FileInputStream(file);
+            ObjectInputStream objIn=new ObjectInputStream(in);
+            temp=objIn.readObject();
+            objIn.close();
         } catch (IOException e) {
-            System.out.println("HEAD文件更新失败。");
+            System.out.println("读取失败！");
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        return temp;
+    }
+
+    //访问器：get方法
+
+    public String getRootTreeKey(){
+        return this.rootTreeKey;
     }
 
     public String getAuthor(){
-        System.out.println("请输入作者："); 
-        Scanner input = new Scanner(System.in);
-        String author = input.nextLine();
-        return author；
+        return this.author;
     }
 
     public String getCommitter(){
-        System.out.println("请输入该次commit的提交者："); 
-        Scanner input = new Scanner(System.in);
-        String committer = input.nextLine();
-        return committer；
+        return committer;
     }
 
-    public String getUserInput(){
-        System.out.println("请输入该次commit的备注："); 
-        Scanner input = new Scanner(System.in);
-        String UserInput = input.nextLine();
-        return UserInput；
+    public String getMessage(){
+        return message;
     }
 
-    public String returnKey(){
-        return this.key;
+    public String getKey(){
+        return key;
     }
 
-    public String returnValue(){
-        return this.value;
+    public String getValue(){
+        return value;
     }
 
-    public String returnPresentcommit(){
-        return this.presentcommit;
+    public String getPreviousCommit(){
+        return this.previousCommit;
     }
 }
