@@ -141,7 +141,6 @@ import java.util.Scanner;
                 String treeKey = input_log.nextLine ( );
                 String sign = input_log.next ( );
                 String previousCommit = input_log.next ( );
-                input_log.close ( );
                 System.out.println ( pCommit );
                 System.out.println ( Hash.readFromTextFile ( pCommitfile ) );
                 pCommit = previousCommit;
