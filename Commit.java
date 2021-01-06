@@ -18,7 +18,7 @@ public class Commit extends Hash implements Serializable{
         this.key=givenCommitKey;
     }
 
-    //给定根目录路径、作者信息、提交者信息、备注信息4个字符串参数的构造方法
+    //给定根目录路径、作者信息、提交者信息、备注信息、前次提交5个参数的构造方法
     public Commit(String rootDirKey,String author,String committer,String message,String previousCommit) throws Exception{
         this.previousCommit = previousCommit;
         this.author=author;
