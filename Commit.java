@@ -9,8 +9,6 @@ public class Commit extends Hash implements Serializable{
     protected String author;
     protected String committer;
     protected String message;
-    
-    //分支、object相关commit实现代码 by张楠@ZhangNan13
 
     //无参构造方法
     public Commit(){}
@@ -20,31 +18,13 @@ public class Commit extends Hash implements Serializable{
         this.key=givenCommitKey;
     }
 
-    //给定根目录路径、作者信息、提交者信息、备注信息4个字符串参数的构造方法
-    public Commit(String rootDirPath,String author,String committer,String message) throws Exception {
-        //根据所给定工作区目录，对根文件夹进行遍历并返回对应key值
-        String rootDirKey=Hash.Show_KVstore(rootDirPath);
-        // 查找当前分支
-        String branchname = Branch.branchcheck();
-        // 若分支存在，创建commit并提交新内容
-        if(branchname != "") {
-            String lastCommitid = Branch.branchcommit();
-            Commit lastCommit = new Commit();
-            if(lastCommitid != ""){
-                lastCommit = (Commit) readCommitFromFile(lastCommitid, Hash.objectpath);
-                String lastRootDirKey = lastCommit.getRootTreeKey();
-                //若与上次Commit中储存的根目录Key相同，则为重复提交，提示用户即可；
-                if(lastRootDirKey==rootDirKey){
-                    System.out.println("文件未发生变动，无需commit。" );
-                }else{//若根目录Key不同，读入previousCommit，创建Commit，更新分支信息；
-                    this.previousCommit=lastCommit.getKey();
-                }
-            }
-        }
+    //给定根目录路径、作者信息、提交者信息、备注信息、前次commit的5个字符串参数的构造方法
+    public Commit(String rootDirKey,String author,String committer,String message,String previousCommit) throws Exception{
+        this.previousCommit = previousCommit;
         this.author=author;
         this.committer=committer;
         this.message=message;
-        this.rootTreeKey= Hash.Show_KVstore(rootDirPath);
+        this.rootTreeKey= rootDirKey;
         this.value ="";
         this.value += "tree " + this.rootTreeKey + "\n";
         this.value += "parent " + this.previousCommit+ "\n";
@@ -52,15 +32,44 @@ public class Commit extends Hash implements Serializable{
         this.value += "committer " + getCommitter() + "\n";
         this.value += this.message+"\n";
         this.key = Treehash(value);
+
     }
 
     //创建Commit
-    public void createCommit(Commit c){
-        //创建Commit对象写入文件
-        Object o = (Object) c;
-        writeCommitToFile(o, c.key, Hash.objectpath);
-        //更新分支信息
-        Branch.commitupdate(c.key);
+    public static Commit createCommit(String rootDirPath,String author,String committer,String message) throws Exception {
+        Commit nCommit = new Commit();
+        //根据所给定工作区目录，对根文件夹进行遍历并返回对应key值
+        String rootDirKey = Hash.Show_KVstore(rootDirPath);
+        // 查找当前分支
+        String branchname = Branch.branchcheck();
+        // 若分支存在，创建commit并提交新内容
+        if(branchname != "") {
+            String lastCommitid = Branch.branchcommit();
+            if(lastCommitid != ""){
+                Commit lastCommit = (Commit) readCommitFromFile(lastCommitid, Hash.objectpath);
+                String lastRootDirKey = lastCommit.getRootTreeKey();
+                //若与上次Commit中储存的根目录Key相同，则为重复提交，提示用户即可；
+                if(lastRootDirKey.equals(rootDirKey)){
+                    System.out.println("文件未发生变动，无需commit。" );
+                }else{//若根目录Key不同，读入previousCommit，创建Commit，更新分支信息；
+                    String previousCommit = lastCommit.getKey();
+                    //创建Commit对象写入文件
+                    nCommit = new Commit(rootDirKey,author,committer,message,previousCommit);
+                    Object o = (Object) nCommit;
+                    writeCommitToFile(o, nCommit.key, Hash.objectpath);
+                    //更新分支信息
+                    Branch.commitupdate(nCommit.key);
+                }
+            }else{
+                //创建Commit对象写入文件
+                nCommit = new Commit(rootDirKey,author,committer,message,null);
+                Object o = (Object) nCommit;
+                writeCommitToFile(o, nCommit.key, Hash.objectpath);
+                //更新分支信息
+                Branch.commitupdate(nCommit.key);
+            }
+        }
+        return nCommit;
     }
 
     /* object对象保存方法 */
