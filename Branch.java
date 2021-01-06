@@ -30,10 +30,12 @@ public class Branch extends Hash{
     /* 查找当前分支最新提交 */
     public static void branchcommit(){
         String bname = branchcheck();
+        String commitid = "";
         if(bname != ""){
-            String commitid = Hash.readObjectFromFile(bname, branchaddress);
+            commitid = Hash.readObjectFromFile(bname, branchaddress);
             System.out.println("当前commit id为：" + commitid );
         }
+        return commitid;
     }
 
     /* Branch创建方法 */
